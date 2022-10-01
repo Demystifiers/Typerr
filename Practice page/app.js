@@ -1,110 +1,156 @@
-// /*const name1 = new String('Jeff');
+const form = document.querySelector("#task-form");
+const tasklist = document.querySelector(".collection");
+const clearBtn = document.querySelector(".clear-tasks");
+const filter = document.querySelector("#filter");
+const taskInput = document.querySelector("#task");
 
-// console.log(name1);
-// name1.foo = 'asdf';
+loadEventListeners();
 
-// console.log(name1);
-// console.log(name1[0]);
-// console.log(name1[1]);
-// console.log(name1[2]);
-// console.log(name1[3]);
-// console.log(name1.foo);
-// console.log(name1.foo[0]);
-// console.log(name1.foo[1]);
+function loadEventListeners()
+{
+    document.addEventListener('DOMContentLoaded', getTasks);
+    form.addEventListener('submit', addTask);
+    tasklist.addEventListener('click', removeTask);
+    clearBtn.addEventListener('click', clearTasks);
+    filter.addEventListener('keyup', filterTasks);
+}
 
+function getTasks()
+{
+    let tasks;
 
-// //const num = new Number(11);
+    if(localStorage.getItem('tasks') === null)
+        tasks = [];
+    else
+        tasks = JSON.parse(localStorage.getItem('tasks'));
 
-// //num.aa = 67;
+    tasks.forEach( task => {
 
-// const num1 = function(x , y){
-//     return x+y;
-// }
+        const li = document.createElement('li');
+        li.className = 'collection-item';
+        li.appendChild(document.createTextNode(task));
 
-// const num = new Function('x' , 'y' , 'z' , 'return x+y+z');
+        const link = document.createElement('a');
+        link.className = 'delete-item secondary-content';
+        link.innerHTML = '<i class="fa fa-remove"></i>';
 
-// console.log(num(1 , 4, 5));
-// console.log(num1(1 , 3));
-// */
-// /*
+        li.appendChild(link);
 
-// function person(fn, ln)
-// {
-//     this.fna = fn;
-//     this.lna = ln;
+        tasklist.appendChild(li);
 
-//     this.gna = function(){
-//         return `${this.fna}`;
-//     }
-// }
+    })
 
-// person.prototype.gnm = function(){
-//     return `${lna}`
-// }
+}
 
-// ash = new person("p" , 'o');
-
-// //console.log(ash)
-// //console.log(ash.hasOwnProperty('gna'))
-// //console.log(ash.hasOwnProperty("gnm"))
-
-// function cust(fn , ln , date)
-// {
-//     person.call(this , ln, fn);
-
-//     this.d = date;
-// }
-
-// qe = new cust("a" , "b" , "c");
-
-// console.log(qe);
-// console.log(qe.fna);
-// console.log(qe.lna);
-// console.log(qe.d);
-// console.log(qe.gna());
-// */
-
-// class Person {
-
-//    // let fn,ln;
-
-//     constructor(f , l)
-//     {
-//         this.fn = f;
-//         this.ln = l;
-//     }
-
-//     gn()
-//     {
-//         return `${this.fn} ${this.ln}`;
-//     }
-
-//     cn(nn)
-//     {
-//         this.ln = nn;
-//     }
-// }
-
-// let ash = new Person("a" , "b");
-// console.log(ash);
-// console.log(ash.gn());
-// console.log(ash.cn("c"));
-// console.log(ash.gn());
-
-console.log(1);
-
-setTimeout(test, 2000);
-
-function test() {
-
-    xhr = new XMLHttpRequest();
-
-    xhr.open('GET', 'abc.txt', true);
-
-    xhr.onload = function () {
-        if (this.status === 200)
-            console.log(xhr.responseText);
+function addTask(e) 
+{
+    if(taskInput.value == '')
+    {
+        alert('Add a task');
     }
 
-    xhr.send();
+    const li = document.createElement('li');
+    li.className = 'collection-item';
+    li.appendChild(document.createTextNode(taskInput.value));
+
+    const link = document.createElement('a');
+    link.className = 'delete-item secondary-content';
+    link.innerHTML = '<i class="fa fa-remove"></i>';
+
+    li.appendChild(link);
+
+    tasklist.appendChild(li);
+
+    console.log(li);
+
+    storeTaskInLocalStorage(taskInput.value);
+
+    taskInput.value = '';
+
+    e.preventDefault();    
+}
+
+function storeTaskInLocalStorage(task)
+{
+    let tasks;
+
+    if(localStorage.getItem('tasks') === null)
+        tasks = [];
+    else
+        tasks = JSON.parse(localStorage.getItem('tasks'));
+
+    tasks.push(task);
+
+    localStorage.setItem('tasks' , JSON.stringify(tasks));
+}
+
+function removeTask(e)
+{
+    if(e.target.parentElement.classList.contains('delete-item'))
+    {
+        if(confirm('Are you sure ?'))
+        {
+            e.target.parentElement.parentElement.remove();
+            
+            removeTaskFromLocalStorage(e.target.parentElement.parentElement);
+        }
+    }
+
+}
+
+function removeTaskFromLocalStorage(taskItem)
+{
+    let tasks;
+
+    if(localStorage.getItem('tasks') === null)
+        tasks = [];
+    else
+        tasks = JSON.parse(localStorage.getItem('tasks'));
+        
+    tasks.forEach(function(task , index){
+
+        if(taskItem.textContent === task)
+        {
+            tasks.splice(index , 1);
+        }
+    })
+
+    localStorage.setItem('tasks' , JSON.stringify(tasks));
+}
+
+function clearTasks()
+{
+    console.log(tasklist.childNodes);
+
+    if(confirm('Are you sure ?'));
+    {
+        while(tasklist.firstChild)
+            tasklist.removeChild(tasklist.lastChild);
+    }
+
+    clearTasksFromLocalStorage();
+
+}
+
+function clearTasksFromLocalStorage()
+{
+    localStorage.clear();
+}
+
+function filterTasks(e)
+{
+    const text = e.target.value.toLowerCase();
+
+    console.log(text)
+
+    document.querySelectorAll(".collection-item").forEach(task => {
+        
+        const item = task.firstChild.textContent;
+        
+        if(item.toLowerCase().indexOf(text) != -1)
+            task.style.display = 'block';
+        else
+            task.style.display = 'none';
+    });
+
 }
